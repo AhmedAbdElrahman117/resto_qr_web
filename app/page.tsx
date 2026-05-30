@@ -1,259 +1,231 @@
+'use client';
+
+import { useState } from 'react';
 import Image from 'next/image';
-
-import { createServerSupabaseClient } from '@/lib/supabase/client';
-import type { Restaurant } from '@/lib/types';
+import type { CategoryWithItems, MenuItem, Restaurant, Banner } from '@/lib/types';
 import DarkModeToggle from '@/components/DarkModeToggle';
-import RestaurantCardLink from '@/components/RestaurantCardLink';
-import ContactForm from '@/components/ContactForm';
-import AnimatedStat from '@/components/AnimatedStat';
-import RevealOnScroll from '@/components/RevealOnScroll';
+import BannerCarousel from '@/components/BannerCarousel';
+import CategoryTabs from '@/components/CategoryTabs';
 
-type RestaurantMenu = {
-  menuId: string;
-  restaurant: Restaurant;
+// ─── Mock Data ────────────────────────────────────────────────────────────────
+// Self-contained demo data so the page works immediately without a database.
+
+const MOCK_RESTAURANT: Restaurant = {
+  id: 'demo-restaurant',
+  owner_id: 'demo-owner',
+  restaurant_name: 'The Gourmet Kitchen',
+  restaurant_address: '123 Culinary Lane, Foodie City, FC 12345',
+  restaurant_logo_url: 'https://picsum.photos/seed/logo/200/200',
+  restaurant_description: 'A modern dining experience with locally-sourced ingredients and innovative dishes.',
+  menu_url: null,
+  created_at: new Date().toISOString(),
 };
 
-async function fetchRestaurantMenus(): Promise<RestaurantMenu[]> {
-  const supabase = createServerSupabaseClient();
+const MENU_ID = 'demo-menu';
 
-  const { data, error } = await supabase
-    .from('menus')
-    .select(`
-      id,
-      restaurants (
-        id,
-        owner_id,
-        restaurant_name,
-        restaurant_address,
-        restaurant_logo_url,
-        restaurant_description,
-        menu_url,
-        created_at
-      )
-    `)
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    console.error('Failed to load restaurants:', error.message);
-    return [];
-  }
-
-  return (data ?? [])
-    .map((row) => {
-      const raw = (row as { restaurants?: Restaurant | Restaurant[] | null }).restaurants;
-      const restaurant = Array.isArray(raw) ? raw[0] : raw ?? null;
-      if (!restaurant) return null;
-      return { menuId: row.id as string, restaurant };
-    })
-    .filter(Boolean) as RestaurantMenu[];
+function generateMockBanners(): Banner[] {
+  return [
+    { id: 'banner-1', menu_id: MENU_ID, image_url: 'https://picsum.photos/seed/promo1/800/400', redirect_url: null, is_live: true, interactions: 0, expires_at: null, created_at: new Date().toISOString() },
+    { id: 'banner-2', menu_id: MENU_ID, image_url: 'https://picsum.photos/seed/promo2/800/400', redirect_url: null, is_live: true, interactions: 0, expires_at: null, created_at: new Date().toISOString() },
+    { id: 'banner-3', menu_id: MENU_ID, image_url: 'https://picsum.photos/seed/promo3/800/400', redirect_url: null, is_live: true, interactions: 0, expires_at: null, created_at: new Date().toISOString() },
+    { id: 'banner-4', menu_id: MENU_ID, image_url: 'https://picsum.photos/seed/promo4/800/400', redirect_url: null, is_live: true, interactions: 0, expires_at: null, created_at: new Date().toISOString() },
+  ];
 }
 
-export default async function Home() {
-  const restaurants = await fetchRestaurantMenus();
+function generateMockCategories(): CategoryWithItems[] {
+  const categories = [
+    { name: 'Starters', emoji: 'S', items: ['Bruschetta', 'Garlic Bread', 'Caesar Salad', 'Soup of the Day', 'Spring Rolls'] },
+    { name: 'Main Courses', emoji: 'M', items: ['Grilled Salmon', 'Beef Tenderloin', 'Chicken Parmesan', 'Vegetable Risotto', 'Lamb Chops', 'Pasta Carbonara', 'Duck Confit'] },
+    { name: 'Pizza', emoji: 'P', items: ['Margherita', 'Pepperoni', 'Four Cheese', 'BBQ Chicken', 'Veggie Supreme', 'Hawaiian'] },
+    { name: 'Burgers', emoji: 'B', items: ['Classic Cheeseburger', 'Bacon BBQ Burger', 'Mushroom Swiss', 'Veggie Burger', 'Double Stack'] },
+    { name: 'Pasta', emoji: 'A', items: ['Spaghetti Bolognese', 'Fettuccine Alfredo', 'Penne Arrabbiata', 'Lasagna', 'Ravioli'] },
+    { name: 'Seafood', emoji: 'F', items: ['Lobster Tail', 'Shrimp Scampi', 'Fish & Chips', 'Calamari', 'Crab Cakes'] },
+    { name: 'Desserts', emoji: 'D', items: ['Tiramisu', 'Chocolate Lava Cake', 'Cheesecake', 'Gelato', 'Crème Brûlée', 'Apple Pie'] },
+    { name: 'Beverages', emoji: 'V', items: ['Fresh Lemonade', 'Iced Tea', 'Espresso', 'Cappuccino', 'Smoothies', 'Milkshakes'] },
+  ];
+
+  return categories.map((cat, catIndex) => ({
+    id: `category-${catIndex}`,
+    menu_id: MENU_ID,
+    name: cat.name,
+    image_url: `https://picsum.photos/seed/cat${catIndex}/100/100`,
+    items_count: cat.items.length,
+    is_visible: true,
+    created_at: new Date().toISOString(),
+    items: cat.items.map((itemName, itemIndex): MenuItem => {
+      const hasDiscount = itemIndex % 3 === 0;
+      const isPopular = itemIndex === 0;
+      const isSpicy = cat.name === 'Main Courses' && itemIndex % 2 === 0;
+      const isVegetarian = itemName.toLowerCase().includes('veggie') || itemName.toLowerCase().includes('vegetable');
+      
+      return {
+        id: `item-${catIndex}-${itemIndex}`,
+        category_id: `category-${catIndex}`,
+        restaurant_id: MOCK_RESTAURANT.id,
+        owner_id: MOCK_RESTAURANT.owner_id,
+        name: itemName,
+        description: `A delicious ${itemName.toLowerCase()} prepared with fresh ingredients and our chef's special touch. Perfect for any occasion.`,
+        price: ((Math.random() * 25) + 8).toFixed(2),
+        discount: hasDiscount ? String(10 + Math.floor(Math.random() * 20)) : null,
+        image_urls: [`https://picsum.photos/seed/food${catIndex}${itemIndex}/400/400`],
+        is_visible: true,
+        views_count: Math.floor(Math.random() * 500),
+        expires_at: null,
+        created_at: new Date().toISOString(),
+        dietary_tags: [
+          ...(isPopular ? ['popular' as const] : []),
+          ...(isSpicy ? ['spicy' as const] : []),
+          ...(isVegetarian ? ['vegetarian' as const] : []),
+        ],
+      };
+    }),
+  }));
+}
+
+const MOCK_BANNERS = generateMockBanners();
+const MOCK_CATEGORIES = generateMockCategories();
+
+// ─── Demo Menu Header ─────────────────────────────────────────────────────────
+
+function DemoMenuHeader({ restaurant }: { restaurant: Restaurant }) {
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   return (
-    <div className="min-h-dvh bg-background">
-      {/* Top bar */}
-      <RevealOnScroll delayMs={0}>
-        <header className="sticky top-0 z-50 border-b border-border bg-surface/80 backdrop-blur-md">
-          <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
-            <div className="flex items-center gap-3">
-              <Image src="/logo.svg" alt="RestoQR logo" width={38} height={38} priority />
-              <div className="flex flex-col leading-tight">
-                <span className="text-base font-extrabold tracking-tight text-foreground">RestoQR</span>
-                <span className="text-xs text-muted">Digital menu platform</span>
-              </div>
-            </div>
-            <nav className="hidden items-center gap-6 md:flex" aria-label="Primary">
-              <a className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground" href="#restaurants">Restaurants</a>
-              <a className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground" href="#how">How it works</a>
-              <a className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground" href="#support">Support</a>
-            </nav>
-            <DarkModeToggle />
-          </div>
-        </header>
-      </RevealOnScroll>
-
-      <main className="mx-auto max-w-6xl px-4 sm:px-6">
-        {/* Hero */}
-        <section className="grid gap-8 py-12 lg:grid-cols-2 lg:items-center lg:py-20">
-          <RevealOnScroll delayMs={200}>
-            <div className="flex flex-col gap-5">
-              <span className="inline-flex w-fit items-center rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">
-                Digital menus
-              </span>
-              <h1 className="text-pretty text-4xl font-extrabold leading-tight tracking-tight text-foreground sm:text-5xl">
-                Modern menus, instantly accessible.
-              </h1>
-              <p className="max-w-lg text-pretty text-base leading-relaxed text-muted-foreground">
-                RestoQR helps guests discover restaurants and open menus in seconds while
-                restaurants keep branding and updates effortless.
-              </p>
-              <div className="flex flex-wrap items-center gap-4">
-                <a
-                  className="inline-flex items-center justify-center rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:brightness-105 active:scale-95"
-                  href="#restaurants"
-                >
-                  Browse restaurants
-                </a>
-                <span className="text-sm text-muted">{restaurants.length} live menus</span>
-              </div>
-              <div className="mt-2 grid grid-cols-3 gap-4 border-t border-border pt-6">
-                <AnimatedStat value={restaurants.length} label="Restaurants" delayMs={600} />
-                <AnimatedStat value="QR ready" label="Instant access" delayMs={800} />
-                <AnimatedStat value="Live updates" label="Always current" delayMs={1000} />
-              </div>
-            </div>
-          </RevealOnScroll>
-
-          <RevealOnScroll delayMs={400}>
-            <div className="rounded-card border border-border bg-surface p-7 shadow-md">
-              <p className="text-xs font-semibold uppercase tracking-wide text-primary">Why RestoQR</p>
-              <h3 className="mt-2 text-2xl font-bold text-foreground">A polished menu experience</h3>
-              <ul className="mt-5 flex flex-col gap-3">
-                {[
-                  'Open menus instantly without app installs.',
-                  'Explore categories, offers, and best sellers.',
-                  'Designed for clarity, speed, and comfort.',
-                ].map((item) => (
-                  <li key={item} className="flex items-start gap-3 text-sm leading-relaxed text-muted-foreground">
-                    <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary" aria-hidden="true" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-6 rounded-xl bg-primary-soft px-4 py-3 text-sm font-medium text-primary">
-                Tap a restaurant below to start.
-              </div>
-            </div>
-          </RevealOnScroll>
-        </section>
-
-        {/* How it works */}
-        <section id="how" className="py-12">
-          <RevealOnScroll>
-            <div className="mb-8">
-              <p className="text-xs font-semibold uppercase tracking-wide text-primary">How it works</p>
-              <h2 className="mt-1 text-3xl font-extrabold tracking-tight text-foreground">
-                From discovery to menu in seconds
-              </h2>
-            </div>
-          </RevealOnScroll>
-          <div className="grid gap-5 sm:grid-cols-3">
-            {[
-              { i: '01', t: 'Find a restaurant', d: 'Browse curated restaurants or scan a QR code on-site.' },
-              { i: '02', t: 'Open the menu', d: 'Menus load instantly with categories, offers, and best sellers.' },
-              { i: '03', t: 'Stay updated', d: 'Restaurants update menus in real time without reprinting.' },
-            ].map((step, idx) => (
-              <RevealOnScroll key={step.i} delayMs={(idx + 1) * 100}>
-                <article className="flex h-full flex-col gap-3 rounded-card border border-border bg-surface p-6 shadow-sm">
-                  <span className="text-2xl font-extrabold text-primary/40">{step.i}</span>
-                  <h3 className="text-lg font-bold text-foreground">{step.t}</h3>
-                  <p className="text-sm leading-relaxed text-muted-foreground">{step.d}</p>
-                </article>
-              </RevealOnScroll>
-            ))}
-          </div>
-        </section>
-
-        {/* Restaurants */}
-        <section id="restaurants" className="py-12">
-          <RevealOnScroll>
-            <div className="mb-8 flex flex-wrap items-end justify-between gap-3">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-primary">Restaurants</p>
-                <h2 className="mt-1 text-3xl font-extrabold tracking-tight text-foreground">Choose a restaurant</h2>
-              </div>
-              <span className="text-sm text-muted">{restaurants.length} available</span>
-            </div>
-          </RevealOnScroll>
-
-          {restaurants.length > 0 ? (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {restaurants.map(({ menuId, restaurant }, index) => (
-                <RevealOnScroll key={menuId} delayMs={(index % 4) * 100}>
-                  <RestaurantCardLink menuId={menuId} restaurant={restaurant} delayMs={0} />
-                </RevealOnScroll>
-              ))}
-            </div>
+    <header className="fixed inset-x-0 top-0 z-[200] border-b border-border bg-surface/85 shadow-[0_4px_24px_rgba(0,0,0,0.04)] backdrop-blur-xl transition-colors duration-300 supports-[backdrop-filter]:bg-surface/85 dark:bg-[rgba(17,17,17,0.9)]">
+      <div className="flex items-center justify-between px-4 py-3 md:px-6 md:py-4">
+        <button
+          type="button"
+          onClick={scrollToTop}
+          aria-label="Scroll to top"
+          className="flex items-center gap-3 text-left transition-opacity hover:opacity-80"
+        >
+          {restaurant.restaurant_logo_url ? (
+            <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded-[10px] border border-border shadow-sm">
+              <Image
+                src={restaurant.restaurant_logo_url}
+                alt={`${restaurant.restaurant_name} logo`}
+                fill
+                sizes="40px"
+                className="object-cover"
+                priority
+              />
+            </span>
           ) : (
-            <div className="rounded-card border border-dashed border-border bg-surface px-6 py-16 text-center text-muted">
-              <p>No restaurants are available yet.</p>
-            </div>
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] bg-primary text-xl font-extrabold text-white">
+              {restaurant.restaurant_name.charAt(0)}
+            </span>
           )}
-        </section>
+          <div className="flex flex-col">
+            <h1 className="max-w-[200px] truncate text-xl font-extrabold tracking-tight text-foreground md:max-w-none">
+              {restaurant.restaurant_name}
+            </h1>
+            <span className="text-xs text-muted-foreground">Digital Menu</span>
+          </div>
+        </button>
 
-        {/* Contact */}
-        <section id="contact" className="py-12">
-          <RevealOnScroll>
-            <div className="mb-8 text-center">
-              <p className="text-xs font-semibold uppercase tracking-wide text-primary">Get in Touch</p>
-              <h2 className="mt-1 text-3xl font-extrabold tracking-tight text-foreground">Contact Us</h2>
-            </div>
-          </RevealOnScroll>
-          <RevealOnScroll delayMs={200}>
-            <ContactForm />
-          </RevealOnScroll>
-        </section>
-      </main>
+        <div className="flex items-center gap-3">
+          {/* Cart placeholder */}
+          <button
+            type="button"
+            className="relative flex h-10 w-10 items-center justify-center rounded-full border border-border bg-surface text-foreground shadow-sm transition-all duration-200 hover:border-primary hover:shadow-md"
+            aria-label="View cart"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="9" cy="21" r="1" />
+              <circle cx="20" cy="21" r="1" />
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+            </svg>
+            <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-white">
+              3
+            </span>
+          </button>
+          <DarkModeToggle />
+        </div>
+      </div>
+    </header>
+  );
+}
 
-      {/* Footer */}
-      <RevealOnScroll delayMs={100}>
-        <footer id="support" className="border-t border-border bg-surface">
-          <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
-            <div className="flex flex-col justify-between gap-8 sm:flex-row">
-              <div className="flex items-center gap-3">
-                <Image src="/logo.svg" alt="RestoQR logo" width={36} height={36} />
-                <div className="flex flex-col leading-tight">
-                  <span className="text-base font-extrabold tracking-tight text-foreground">RestoQR</span>
-                  <span className="text-xs text-muted">Digital menu platform</span>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-10">
-                <div className="flex flex-col gap-2">
-                  <span className="text-sm font-bold text-foreground">Contact</span>
-                  <a className="text-sm text-muted-foreground transition-colors hover:text-primary" href="mailto:support@restoqr.app">
-                    support@restoqr.app
-                  </a>
-                  <span className="text-xs text-muted">Support email placeholder</span>
-                </div>
-                <div className="flex flex-col gap-2">
-                  <span className="text-sm font-bold text-foreground">Explore</span>
-                  <a className="text-sm text-muted-foreground transition-colors hover:text-primary" href="#restaurants">Restaurants</a>
-                  <a className="text-sm text-muted-foreground transition-colors hover:text-primary" href="#how">How it works</a>
-                </div>
-              </div>
-            </div>
+// ─── Restaurant Location Footer ───────────────────────────────────────────────
 
-            <div className="mt-10 flex flex-col items-center justify-between gap-5 border-t border-border pt-6 sm:flex-row">
-              <div className="flex flex-col gap-1 text-center sm:text-left">
-                <span className="text-sm text-muted-foreground">© 2026 RestoQR. All rights reserved.</span>
-                <span className="text-xs text-muted">Built for modern dining rooms.</span>
-              </div>
-              <div className="flex flex-col items-center gap-3 sm:items-end">
-                <p className="text-[0.85rem] text-muted-foreground">
-                  Powered by <span className="font-extrabold text-muted">RestoQR</span>
-                </p>
-                <a
-                  href="https://play.google.com/store"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2.5 rounded-xl border-[1.5px] border-border bg-background px-5 py-2.5 text-foreground shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary hover:shadow-md"
-                  aria-label="Download RestoQR on Google Play"
-                >
-                  <svg className="shrink-0 text-foreground" viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
-                    <path d="M3.18 23.5c.37.21.79.21 1.16.01l14.75-8.5-3.14-3.14L3.18 23.5zm-1.18-21v19c0 .45.25.84.62 1.05l12.38-12.38L2.62 1.45A1.17 1.17 0 0 0 2 2.5zM20.75 10.5l-2.97-1.71-3.37 3.38 3.37 3.37 2.99-1.72c.85-.49.85-1.83-.02-2.32zm-17.57-8L16.93 10l-3.14-3.14L3.18 1.5z" />
-                  </svg>
-                  <span className="flex flex-col gap-px">
-                    <span className="text-[0.7rem] font-normal leading-none text-muted">Get it on</span>
-                    <span className="text-base font-bold leading-none text-foreground">Google Play</span>
-                  </span>
-                </a>
-              </div>
+function DemoRestaurantLocation({ restaurant }: { restaurant: Restaurant }) {
+  return (
+    <section className="border-t border-border bg-surface px-4 py-8">
+      <div className="mx-auto max-w-2xl">
+        <h2 className="mb-4 text-lg font-bold text-foreground">Visit Us</h2>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
+          <div className="flex items-start gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-soft text-primary">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                <circle cx="12" cy="10" r="3" />
+              </svg>
+            </span>
+            <div>
+              <p className="font-semibold text-foreground">{restaurant.restaurant_name}</p>
+              <p className="text-sm text-muted-foreground">{restaurant.restaurant_address}</p>
             </div>
           </div>
+          <a
+            href={`https://maps.google.com/?q=${encodeURIComponent(restaurant.restaurant_address)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center gap-2 rounded-xl border border-primary bg-primary-soft px-4 py-2.5 text-sm font-semibold text-primary transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md sm:ml-auto"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="3 11 22 2 13 21 11 13 3 11" />
+            </svg>
+            Get Directions
+          </a>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── Main Page Component ──────────────────────────────────────────────────────
+
+export default function MenuViewerDemo() {
+  return (
+    <>
+      {/* 1. Sticky Top Navigation */}
+      <DemoMenuHeader restaurant={MOCK_RESTAURANT} />
+
+      {/* Main scrollable area (offset below the fixed header) */}
+      <main className="animate-page-enter pt-[68px]">
+        {/* 2. Banners Section */}
+        <BannerCarousel banners={MOCK_BANNERS} menuId={MENU_ID} />
+
+        {/* 3. Categories & Items */}
+        <CategoryTabs categories={MOCK_CATEGORIES} menuId={MENU_ID} />
+
+        {/* 4. Location Footer */}
+        <DemoRestaurantLocation restaurant={MOCK_RESTAURANT} />
+
+        {/* 5. Powered By Footer */}
+        <footer className="mt-2 flex flex-col items-center gap-4 border-t border-border px-4 pb-12 pt-8">
+          <p className="text-[0.85rem] text-muted-foreground">
+            Powered by <span className="font-extrabold text-muted">RestoQR</span>
+          </p>
+          <a
+            href="https://play.google.com/store"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2.5 rounded-xl border-[1.5px] border-border bg-surface px-5 py-2.5 text-foreground shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary hover:shadow-md"
+            aria-label="Download RestoQR on Google Play"
+          >
+            <svg className="shrink-0 text-foreground" viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+              <path d="M3.18 23.5c.37.21.79.21 1.16.01l14.75-8.5-3.14-3.14L3.18 23.5zm-1.18-21v19c0 .45.25.84.62 1.05l12.38-12.38L2.62 1.45A1.17 1.17 0 0 0 2 2.5zM20.75 10.5l-2.97-1.71-3.37 3.38 3.37 3.37 2.99-1.72c.85-.49.85-1.83-.02-2.32zm-17.57-8L16.93 10l-3.14-3.14L3.18 1.5z" />
+            </svg>
+            <span className="flex flex-col gap-px">
+              <span className="text-[0.7rem] font-normal leading-none text-muted">Get it on</span>
+              <span className="text-base font-bold leading-none text-foreground">Google Play</span>
+            </span>
+          </a>
         </footer>
-      </RevealOnScroll>
-    </div>
+      </main>
+    </>
   );
 }

@@ -1448,12 +1448,14 @@ html[data-items-view='grid'] .item-list .editorial-image-wrapper {
   font-weight: 800;
   background: linear-gradient(135deg, #e11d48, #be123c);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .dark .modal-price-discounted {
   background: linear-gradient(135deg, #fb7185, #f43f5e);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 

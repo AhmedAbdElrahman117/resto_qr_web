@@ -1,13 +1,16 @@
 export default function SkeletonCard() {
   return (
-    <article className="skeleton-card" aria-hidden="true">
-      <div className="editorial-card-content" style={{ gap: '12px' }}>
-        <div className="skeleton" style={{ height: '24px', width: '70%' }} />
-        <div className="skeleton" style={{ height: '16px', width: '90%' }} />
-        <div className="skeleton" style={{ height: '16px', width: '50%' }} />
-        <div className="skeleton" style={{ height: '20px', width: '40%', marginTop: 'auto' }} />
+    <article
+      className="flex items-center gap-3 rounded-card border border-border bg-surface p-3"
+      aria-hidden="true"
+    >
+      <div className="flex flex-1 flex-col gap-3">
+        <div className="skeleton h-6 w-[70%]" />
+        <div className="skeleton h-4 w-[90%]" />
+        <div className="skeleton h-4 w-1/2" />
+        <div className="skeleton mt-auto h-5 w-2/5" />
       </div>
-      <div className="skeleton" style={{ width: '110px', height: '110px', flexShrink: 0, borderRadius: '12px' }} />
+      <div className="skeleton h-[110px] w-[110px] shrink-0 rounded-xl" />
     </article>
   );
 }

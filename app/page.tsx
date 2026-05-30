@@ -52,61 +52,53 @@ export default async function Home() {
   const restaurants = await fetchRestaurantMenus();
 
   return (
-    <div className="landing-shell">
-      <div className="landing-bubbles" aria-hidden="true">
-        <span className="landing-bubble" />
-        <span className="landing-bubble" />
-        <span className="landing-bubble" />
-        <span className="landing-bubble" />
-        <span className="landing-bubble" />
-        <span className="landing-bubble" />
-        <span className="landing-bubble" />
-        <span className="landing-bubble" />
-        <span className="landing-bubble" />
-        <span className="landing-bubble" />
-      </div>
+    <div className="min-h-dvh bg-background">
+      {/* Top bar */}
       <RevealOnScroll delayMs={0}>
-        <div className="landing-topbar">
-          <div className="landing-brand">
-            <Image
-              src="/logo.svg"
-              alt="RestoQR logo"
-              width={38}
-              height={38}
-              className="landing-brand-logo"
-              priority
-            />
-            <div className="landing-brand-text">
-              <span className="landing-brand-name">RestoQR</span>
-              <span className="landing-brand-tag">Digital menu platform</span>
+        <header className="sticky top-0 z-50 border-b border-border bg-surface/80 backdrop-blur-md">
+          <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
+            <div className="flex items-center gap-3">
+              <Image src="/logo.svg" alt="RestoQR logo" width={38} height={38} priority />
+              <div className="flex flex-col leading-tight">
+                <span className="text-base font-extrabold tracking-tight text-foreground">RestoQR</span>
+                <span className="text-xs text-muted">Digital menu platform</span>
+              </div>
             </div>
-          </div>
-          <nav className="landing-nav" aria-label="Primary">
-            <a className="landing-nav-link" href="#restaurants">Restaurants</a>
-            <a className="landing-nav-link" href="#how">How it works</a>
-            <a className="landing-nav-link" href="#support">Support</a>
-          </nav>
-          <div className="landing-topbar-actions">
+            <nav className="hidden items-center gap-6 md:flex" aria-label="Primary">
+              <a className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground" href="#restaurants">Restaurants</a>
+              <a className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground" href="#how">How it works</a>
+              <a className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground" href="#support">Support</a>
+            </nav>
             <DarkModeToggle />
           </div>
-        </div>
+        </header>
       </RevealOnScroll>
 
-      <main className="landing-main">
-        <section className="landing-hero">
+      <main className="mx-auto max-w-6xl px-4 sm:px-6">
+        {/* Hero */}
+        <section className="grid gap-8 py-12 lg:grid-cols-2 lg:items-center lg:py-20">
           <RevealOnScroll delayMs={200}>
-            <div className="landing-hero-text">
-              <span className="landing-pill">Digital menus</span>
-              <h1 className="landing-title">Modern menus, instantly accessible.</h1>
-              <p className="landing-subtitle">
+            <div className="flex flex-col gap-5">
+              <span className="inline-flex w-fit items-center rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">
+                Digital menus
+              </span>
+              <h1 className="text-pretty text-4xl font-extrabold leading-tight tracking-tight text-foreground sm:text-5xl">
+                Modern menus, instantly accessible.
+              </h1>
+              <p className="max-w-lg text-pretty text-base leading-relaxed text-muted-foreground">
                 RestoQR helps guests discover restaurants and open menus in seconds while
                 restaurants keep branding and updates effortless.
               </p>
-              <div className="landing-actions">
-                <a className="landing-primary" href="#restaurants">Browse restaurants</a>
-                <span className="landing-meta">{restaurants.length} live menus</span>
+              <div className="flex flex-wrap items-center gap-4">
+                <a
+                  className="inline-flex items-center justify-center rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:brightness-105 active:scale-95"
+                  href="#restaurants"
+                >
+                  Browse restaurants
+                </a>
+                <span className="text-sm text-muted">{restaurants.length} live menus</span>
               </div>
-              <div className="landing-metrics">
+              <div className="mt-2 grid grid-cols-3 gap-4 border-t border-border pt-6">
                 <AnimatedStat value={restaurants.length} label="Restaurants" delayMs={600} />
                 <AnimatedStat value="QR ready" label="Instant access" delayMs={800} />
                 <AnimatedStat value="Live updates" label="Always current" delayMs={1000} />
@@ -115,105 +107,88 @@ export default async function Home() {
           </RevealOnScroll>
 
           <RevealOnScroll delayMs={400}>
-            <div className="landing-hero-card">
-              <p className="landing-card-eyebrow">Why RestoQR</p>
-              <h3 className="landing-card-title">A polished menu experience</h3>
-              <ul className="landing-card-list">
-                <li>
-                  <span className="landing-dot" aria-hidden="true" />
-                  Open menus instantly without app installs.
-                </li>
-                <li>
-                  <span className="landing-dot" aria-hidden="true" />
-                  Explore categories, offers, and best sellers.
-                </li>
-                <li>
-                  <span className="landing-dot" aria-hidden="true" />
-                  Designed for clarity, speed, and comfort.
-                </li>
+            <div className="rounded-card border border-border bg-surface p-7 shadow-md">
+              <p className="text-xs font-semibold uppercase tracking-wide text-primary">Why RestoQR</p>
+              <h3 className="mt-2 text-2xl font-bold text-foreground">A polished menu experience</h3>
+              <ul className="mt-5 flex flex-col gap-3">
+                {[
+                  'Open menus instantly without app installs.',
+                  'Explore categories, offers, and best sellers.',
+                  'Designed for clarity, speed, and comfort.',
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-3 text-sm leading-relaxed text-muted-foreground">
+                    <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary" aria-hidden="true" />
+                    {item}
+                  </li>
+                ))}
               </ul>
-              <div className="landing-card-footer">Tap a restaurant below to start.</div>
+              <div className="mt-6 rounded-xl bg-primary-soft px-4 py-3 text-sm font-medium text-primary">
+                Tap a restaurant below to start.
+              </div>
             </div>
           </RevealOnScroll>
         </section>
 
-        <section id="how" className="landing-section landing-highlights">
+        {/* How it works */}
+        <section id="how" className="py-12">
           <RevealOnScroll>
-            <div className="landing-section-header">
-              <div className="landing-section-title-wrap">
-                <p className="landing-section-kicker">How it works</p>
-                <h2 className="landing-section-title">From discovery to menu in seconds</h2>
-              </div>
+            <div className="mb-8">
+              <p className="text-xs font-semibold uppercase tracking-wide text-primary">How it works</p>
+              <h2 className="mt-1 text-3xl font-extrabold tracking-tight text-foreground">
+                From discovery to menu in seconds
+              </h2>
             </div>
           </RevealOnScroll>
-          <div className="landing-highlight-grid">
-            <RevealOnScroll delayMs={100}>
-              <article className="landing-highlight-card">
-                <span className="landing-highlight-index">01</span>
-                <h3 className="landing-highlight-title">Find a restaurant</h3>
-                <p className="landing-highlight-text">
-                  Browse curated restaurants or scan a QR code on-site.
-                </p>
-              </article>
-            </RevealOnScroll>
-            <RevealOnScroll delayMs={200}>
-              <article className="landing-highlight-card">
-                <span className="landing-highlight-index">02</span>
-                <h3 className="landing-highlight-title">Open the menu</h3>
-                <p className="landing-highlight-text">
-                  Menus load instantly with categories, offers, and best sellers.
-                </p>
-              </article>
-            </RevealOnScroll>
-            <RevealOnScroll delayMs={300}>
-              <article className="landing-highlight-card">
-                <span className="landing-highlight-index">03</span>
-                <h3 className="landing-highlight-title">Stay updated</h3>
-                <p className="landing-highlight-text">
-                  Restaurants update menus in real time without reprinting.
-                </p>
-              </article>
-            </RevealOnScroll>
+          <div className="grid gap-5 sm:grid-cols-3">
+            {[
+              { i: '01', t: 'Find a restaurant', d: 'Browse curated restaurants or scan a QR code on-site.' },
+              { i: '02', t: 'Open the menu', d: 'Menus load instantly with categories, offers, and best sellers.' },
+              { i: '03', t: 'Stay updated', d: 'Restaurants update menus in real time without reprinting.' },
+            ].map((step, idx) => (
+              <RevealOnScroll key={step.i} delayMs={(idx + 1) * 100}>
+                <article className="flex h-full flex-col gap-3 rounded-card border border-border bg-surface p-6 shadow-sm">
+                  <span className="text-2xl font-extrabold text-primary/40">{step.i}</span>
+                  <h3 className="text-lg font-bold text-foreground">{step.t}</h3>
+                  <p className="text-sm leading-relaxed text-muted-foreground">{step.d}</p>
+                </article>
+              </RevealOnScroll>
+            ))}
           </div>
         </section>
 
-        <section id="restaurants" className="landing-section">
+        {/* Restaurants */}
+        <section id="restaurants" className="py-12">
           <RevealOnScroll>
-            <div className="landing-section-header">
-              <div className="landing-section-title-wrap">
-                <p className="landing-section-kicker">Restaurants</p>
-                <h2 className="landing-section-title">Choose a restaurant</h2>
+            <div className="mb-8 flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-primary">Restaurants</p>
+                <h2 className="mt-1 text-3xl font-extrabold tracking-tight text-foreground">Choose a restaurant</h2>
               </div>
-              <span className="landing-count">{restaurants.length} available</span>
+              <span className="text-sm text-muted">{restaurants.length} available</span>
             </div>
           </RevealOnScroll>
 
           {restaurants.length > 0 ? (
-            <div className="landing-grid">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {restaurants.map(({ menuId, restaurant }, index) => (
                 <RevealOnScroll key={menuId} delayMs={(index % 4) * 100}>
-                  <RestaurantCardLink
-                    menuId={menuId}
-                    restaurant={restaurant}
-                    delayMs={0}
-                  />
+                  <RestaurantCardLink menuId={menuId} restaurant={restaurant} delayMs={0} />
                 </RevealOnScroll>
               ))}
             </div>
           ) : (
-            <div className="landing-empty">
+            <div className="rounded-card border border-dashed border-border bg-surface px-6 py-16 text-center text-muted">
               <p>No restaurants are available yet.</p>
             </div>
           )}
         </section>
 
-        <section id="contact" className="landing-section">
+        {/* Contact */}
+        <section id="contact" className="py-12">
           <RevealOnScroll>
-            <div className="landing-section-header">
-              <div className="landing-section-title-wrap">
-                <p className="landing-section-kicker">Get in Touch</p>
-                <h2 className="landing-section-title">Contact Us</h2>
-              </div>
+            <div className="mb-8 text-center">
+              <p className="text-xs font-semibold uppercase tracking-wide text-primary">Get in Touch</p>
+              <h2 className="mt-1 text-3xl font-extrabold tracking-tight text-foreground">Contact Us</h2>
             </div>
           </RevealOnScroll>
           <RevealOnScroll delayMs={200}>
@@ -222,61 +197,59 @@ export default async function Home() {
         </section>
       </main>
 
+      {/* Footer */}
       <RevealOnScroll delayMs={100}>
-        <footer id="support" className="landing-footer">
-          <div className="landing-footer-inner">
-            <div className="landing-footer-brand">
-              <Image
-                src="/logo.svg"
-                alt="RestoQR logo"
-                width={36}
-                height={36}
-                className="landing-footer-logo"
-              />
-              <div className="landing-footer-brand-text">
-                <span className="landing-footer-name">RestoQR</span>
-                <span className="landing-footer-tag">Digital menu platform</span>
+        <footer id="support" className="border-t border-border bg-surface">
+          <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+            <div className="flex flex-col justify-between gap-8 sm:flex-row">
+              <div className="flex items-center gap-3">
+                <Image src="/logo.svg" alt="RestoQR logo" width={36} height={36} />
+                <div className="flex flex-col leading-tight">
+                  <span className="text-base font-extrabold tracking-tight text-foreground">RestoQR</span>
+                  <span className="text-xs text-muted">Digital menu platform</span>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-10">
+                <div className="flex flex-col gap-2">
+                  <span className="text-sm font-bold text-foreground">Contact</span>
+                  <a className="text-sm text-muted-foreground transition-colors hover:text-primary" href="mailto:support@restoqr.app">
+                    support@restoqr.app
+                  </a>
+                  <span className="text-xs text-muted">Support email placeholder</span>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <span className="text-sm font-bold text-foreground">Explore</span>
+                  <a className="text-sm text-muted-foreground transition-colors hover:text-primary" href="#restaurants">Restaurants</a>
+                  <a className="text-sm text-muted-foreground transition-colors hover:text-primary" href="#how">How it works</a>
+                </div>
               </div>
             </div>
-            <div className="landing-footer-links">
-              <div className="landing-footer-col">
-                <span className="landing-footer-title">Contact</span>
-                <a className="landing-footer-link" href="mailto:support@restoqr.app">
-                  support@restoqr.app
+
+            <div className="mt-10 flex flex-col items-center justify-between gap-5 border-t border-border pt-6 sm:flex-row">
+              <div className="flex flex-col gap-1 text-center sm:text-left">
+                <span className="text-sm text-muted-foreground">© 2026 RestoQR. All rights reserved.</span>
+                <span className="text-xs text-muted">Built for modern dining rooms.</span>
+              </div>
+              <div className="flex flex-col items-center gap-3 sm:items-end">
+                <p className="text-[0.85rem] text-muted-foreground">
+                  Powered by <span className="font-extrabold text-muted">RestoQR</span>
+                </p>
+                <a
+                  href="https://play.google.com/store"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2.5 rounded-xl border-[1.5px] border-border bg-background px-5 py-2.5 text-foreground shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary hover:shadow-md"
+                  aria-label="Download RestoQR on Google Play"
+                >
+                  <svg className="shrink-0 text-foreground" viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+                    <path d="M3.18 23.5c.37.21.79.21 1.16.01l14.75-8.5-3.14-3.14L3.18 23.5zm-1.18-21v19c0 .45.25.84.62 1.05l12.38-12.38L2.62 1.45A1.17 1.17 0 0 0 2 2.5zM20.75 10.5l-2.97-1.71-3.37 3.38 3.37 3.37 2.99-1.72c.85-.49.85-1.83-.02-2.32zm-17.57-8L16.93 10l-3.14-3.14L3.18 1.5z" />
+                  </svg>
+                  <span className="flex flex-col gap-px">
+                    <span className="text-[0.7rem] font-normal leading-none text-muted">Get it on</span>
+                    <span className="text-base font-bold leading-none text-foreground">Google Play</span>
+                  </span>
                 </a>
-                <span className="landing-footer-note">Support email placeholder</span>
               </div>
-              <div className="landing-footer-col">
-                <span className="landing-footer-title">Explore</span>
-                <a className="landing-footer-link" href="#restaurants">Restaurants</a>
-                <a className="landing-footer-link" href="#how">How it works</a>
-              </div>
-            </div>
-          </div>
-          <div className="landing-footer-bottom">
-            <div className="landing-footer-rights">
-              <span>© 2026 RestoQR. All rights reserved.</span>
-              <span className="landing-footer-meta">Built for modern dining rooms.</span>
-            </div>
-            <div className="landing-footer-powered">
-              <p className="powered-by-text">
-                Powered by <span className="powered-by-brand">RestoQR</span>
-              </p>
-              <a
-                href="https://play.google.com/store"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="google-play-btn landing-play-btn landing-footer-download"
-                aria-label="Download RestoQR on Google Play"
-              >
-                <svg className="play-icon" viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
-                  <path d="M3.18 23.5c.37.21.79.21 1.16.01l14.75-8.5-3.14-3.14L3.18 23.5zm-1.18-21v19c0 .45.25.84.62 1.05l12.38-12.38L2.62 1.45A1.17 1.17 0 0 0 2 2.5zM20.75 10.5l-2.97-1.71-3.37 3.38 3.37 3.37 2.99-1.72c.85-.49.85-1.83-.02-2.32zm-17.57-8L16.93 10l-3.14-3.14L3.18 1.5z" />
-                </svg>
-                <span className="play-btn-text">
-                  <span className="play-btn-sub">Get it on</span>
-                  <span className="play-btn-main">Google Play</span>
-                </span>
-              </a>
             </div>
           </div>
         </footer>

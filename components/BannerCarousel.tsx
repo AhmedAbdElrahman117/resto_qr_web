@@ -13,7 +13,7 @@ export default function BannerCarousel({ banners, menuId }: Props) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [itemsPerView, setItemsPerView] = useState(1);
 
-  // Responsive items per view logic
+  // Responsive items-per-view: 1 (mobile) / 2 (tablet) / 3 (desktop).
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 1280) {
@@ -24,8 +24,6 @@ export default function BannerCarousel({ banners, menuId }: Props) {
         setItemsPerView(1);
       }
     };
-    
-    // Initial check
     handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
@@ -35,14 +33,12 @@ export default function BannerCarousel({ banners, menuId }: Props) {
   const isTwoBannerMode = itemsPerView === 2 && banners.length >= 2;
   const isDynamicMode = isThreeBannerMode || isTwoBannerMode;
 
-  const maxIndex = isDynamicMode 
-    ? banners.length - 1 
+  const maxIndex = isDynamicMode
+    ? banners.length - 1
     : Math.max(0, banners.length - itemsPerView);
 
-  // Auto-advance every 7 seconds
   useEffect(() => {
-    if (maxIndex <= 0) return; // Don't auto-advance if all items fit
-    
+    if (maxIndex <= 0) return;
     const interval = setInterval(() => {
       setActiveIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
     }, 7000);
@@ -83,7 +79,6 @@ export default function BannerCarousel({ banners, menuId }: Props) {
     }
   };
 
-  // If there are no banners, don't render anything
   if (!banners || banners.length === 0) return null;
 
   const showControls = maxIndex > 0;
@@ -99,33 +94,48 @@ export default function BannerCarousel({ banners, menuId }: Props) {
     translateX = activeIndex * (100 / itemsPerView);
   }
 
-  const bannerCountStr = banners.length >= 3 ? '3-plus' : banners.length.toString();
+  // Per-slide width / focus styling. Computed here (rather than via CSS data
+  // attributes) so the carousel layout stays in one place with its logic.
+  const slideStyle = (isFocused: boolean): React.CSSProperties => {
+    if (isThreeBannerMode) {
+      return { width: isFocused ? '50%' : '25%', opacity: isFocused ? 1 : 0.35, transform: isFocused ? 'scale(1)' : 'scale(0.96)' };
+    }
+    if (isTwoBannerMode) {
+      return { width: isFocused ? '60%' : '40%', opacity: isFocused ? 1 : 0.35, transform: isFocused ? 'scale(1)' : 'scale(0.96)' };
+    }
+    return { width: '100%' };
+  };
 
   return (
-    <section className="banners-section" aria-label="Promotions" data-banners={bannerCountStr}>
-      <div className="banner-track-wrapper">
+    <section className="relative mt-5 px-4 pb-8" aria-label="Promotions">
+      <div className="relative -m-4 overflow-hidden p-4">
         <div
-          className="banner-track"
+          className="-mx-2 flex transition-transform duration-500 ease-spring"
           style={{ transform: `translateX(-${translateX}%)` }}
         >
           {banners.map((banner, i) => {
             const isFocused = i === activeIndex;
-            
             return (
-              <div 
-                key={banner.id} 
-                className={`banner-slide ${isFocused ? 'is-focused' : 'is-faded'}`}
+              <div
+                key={banner.id}
+                className="shrink-0 px-2 transition-all duration-500 ease-spring"
+                style={slideStyle(isFocused)}
               >
-                <div className="banner-slide-inner">
+                <div
+                  className={[
+                    'group relative overflow-hidden rounded-3xl border border-border transition-shadow duration-500',
+                    isFocused ? 'shadow-lg' : 'shadow-sm',
+                  ].join(' ')}
+                >
                   <Image
                     src={banner.image_url}
                     alt={`Promotion ${i + 1}`}
                     width={900}
                     height={400}
-                    className="banner-img"
                     onClick={() => handleBannerClick(banner)}
                     style={{ cursor: banner.redirect_url ? 'pointer' : 'default' }}
                     priority={i < itemsPerView}
+                    className="aspect-[2/1] w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                   />
                 </div>
               </div>
@@ -133,15 +143,22 @@ export default function BannerCarousel({ banners, menuId }: Props) {
           })}
         </div>
 
-        {/* Navigation Arrows */}
         {showControls && (
           <>
-            <button className="banner-arrow banner-arrow-left" onClick={prevSlide} aria-label="Previous banner">
+            <button
+              onClick={prevSlide}
+              aria-label="Previous banner"
+              className="absolute left-3 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-surface text-foreground opacity-70 shadow-sm transition-all hover:scale-110 hover:opacity-100 hover:shadow-md"
+            >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="15 18 9 12 15 6" />
               </svg>
             </button>
-            <button className="banner-arrow banner-arrow-right" onClick={nextSlide} aria-label="Next banner">
+            <button
+              onClick={nextSlide}
+              aria-label="Next banner"
+              className="absolute right-3 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-surface text-foreground opacity-70 shadow-sm transition-all hover:scale-110 hover:opacity-100 hover:shadow-md"
+            >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="9 18 15 12 9 6" />
               </svg>
@@ -150,18 +167,20 @@ export default function BannerCarousel({ banners, menuId }: Props) {
         )}
       </div>
 
-      {/* Controls: Smooth Page Indicator Dots */}
       {showControls && (
-        <div className="banner-controls">
-          <div className="banner-dots-container" role="tablist" aria-label="Banner navigation">
+        <div className="mt-4 flex items-center justify-center">
+          <div className="flex items-center gap-2" role="tablist" aria-label="Banner navigation">
             {Array.from({ length: maxIndex + 1 }).map((_, i) => (
               <button
                 key={i}
-                className={`banner-dot-circle ${i === activeIndex ? 'active' : ''}`}
                 onClick={() => setActiveIndex(i)}
                 role="tab"
                 aria-selected={i === activeIndex}
                 aria-label={`Go to banner ${i + 1}`}
+                className={[
+                  'h-2 rounded-full transition-all duration-300',
+                  i === activeIndex ? 'w-6 bg-primary' : 'w-2 bg-primary-soft',
+                ].join(' ')}
               />
             ))}
           </div>

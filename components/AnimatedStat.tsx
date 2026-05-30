@@ -48,15 +48,17 @@ export default function AnimatedStat({ value, label, delayMs = 0 }: AnimatedStat
   }, [value, isNumber, delayMs]);
 
   return (
-    <div 
-      className="landing-metric" 
-      style={{ 
+    <div
+      className="flex flex-col gap-1"
+      style={{
         animationDelay: `${delayMs}ms`,
-        animationFillMode: 'backwards' 
+        animationFillMode: 'backwards',
       }}
     >
-      <span className="landing-metric-value">{displayValue}</span>
-      <span className="landing-metric-label">{label}</span>
+      <span className="text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">
+        {displayValue}
+      </span>
+      <span className="text-xs font-medium text-muted">{label}</span>
     </div>
   );
 }

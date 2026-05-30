@@ -4,14 +4,14 @@ import { useTheme } from './ThemeProvider';
 import { useEffect, useState } from 'react';
 
 export default function DarkModeToggle() {
-  const { theme, setTheme, resolvedTheme } = useTheme();
+  const { setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   // Avoid hydration mismatch
   useEffect(() => setMounted(true), []);
 
   if (!mounted) {
-    return <div className="dark-mode-toggle-placeholder" />;
+    return <div className="h-10 w-10" aria-hidden="true" />;
   }
 
   const toggleTheme = () => {
@@ -41,7 +41,7 @@ export default function DarkModeToggle() {
   return (
     <button
       onClick={toggleTheme}
-      className="dark-mode-toggle"
+      className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-background text-foreground transition-all duration-200 hover:bg-border active:scale-95 dark:border-[#333] dark:bg-[#222]"
       aria-label="Toggle dark mode"
     >
       {resolvedTheme === 'dark' ? (

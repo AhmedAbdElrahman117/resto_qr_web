@@ -102,27 +102,12 @@ export default async function MenuPage({ params }: Props) {
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: cssVars }} />
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `
-            try {
-              var key = 'resto-items-view:${menuId}';
-              var stored = localStorage.getItem(key);
-              if (stored === 'list' || stored === 'grid') {
-                document.documentElement.dataset.itemsView = stored;
-              } else {
-                document.documentElement.dataset.itemsView = 'list';
-              }
-            } catch (_) {}
-          `,
-        }}
-      />
 
       {/* 1. Sticky Top Navigation */}
       <MenuHeader restaurant={restaurant} />
 
-      {/* Main scrollable area */}
-      <main className="menu-main-content page-enter">
+      {/* Main scrollable area (offset below the fixed header) */}
+      <main className="animate-page-enter pt-[68px]">
         {/* 2. Banners Section */}
         {mockBanners.length > 0 && (
           <BannerCarousel banners={mockBanners} menuId={menuId} />
@@ -132,8 +117,12 @@ export default async function MenuPage({ params }: Props) {
         {mockCategories.length > 0 ? (
           <CategoryTabs categories={mockCategories} menuId={menuId} />
         ) : (
-          <div className="empty-state" style={{ paddingTop: '60px' }}>
-            <div className="empty-state-icon">🍽️</div>
+          <div className="flex flex-col items-center justify-center gap-3 py-20 text-center text-muted">
+            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M3 2v7c0 1.1.9 2 2 2h0a2 2 0 0 0 2-2V2" />
+              <path d="M5 2v20M11 2v20M11 8a3 3 0 0 0 3 3h1a2 2 0 0 0 2-2V2" />
+              <path d="M19 2v20" />
+            </svg>
             <p>No menu items available yet.</p>
           </div>
         )}
@@ -142,23 +131,23 @@ export default async function MenuPage({ params }: Props) {
         <RestaurantLocation restaurant={restaurant} />
 
         {/* 5. Powered By Footer */}
-        <footer className="powered-by-footer">
-          <p className="powered-by-text">
-            Powered by <span className="powered-by-brand">RestoQR</span>
+        <footer className="mt-2 flex flex-col items-center gap-4 border-t border-border px-4 pb-12 pt-8">
+          <p className="text-[0.85rem] text-muted-foreground">
+            Powered by <span className="font-extrabold text-muted">RestoQR</span>
           </p>
           <a
             href="https://play.google.com/store"
             target="_blank"
             rel="noopener noreferrer"
-            className="google-play-btn"
+            className="flex items-center gap-2.5 rounded-xl border-[1.5px] border-border bg-surface px-5 py-2.5 text-foreground shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary hover:shadow-md"
             aria-label="Download RestoQR on Google Play"
           >
-            <svg className="play-icon" viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+            <svg className="shrink-0 text-foreground" viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
               <path d="M3.18 23.5c.37.21.79.21 1.16.01l14.75-8.5-3.14-3.14L3.18 23.5zm-1.18-21v19c0 .45.25.84.62 1.05l12.38-12.38L2.62 1.45A1.17 1.17 0 0 0 2 2.5zM20.75 10.5l-2.97-1.71-3.37 3.38 3.37 3.37 2.99-1.72c.85-.49.85-1.83-.02-2.32zm-17.57-8L16.93 10l-3.14-3.14L3.18 1.5z" />
             </svg>
-            <span className="play-btn-text">
-              <span className="play-btn-sub">Get it on</span>
-              <span className="play-btn-main">Google Play</span>
+            <span className="flex flex-col gap-px">
+              <span className="text-[0.7rem] font-normal leading-none text-muted">Get it on</span>
+              <span className="text-base font-bold leading-none text-foreground">Google Play</span>
             </span>
           </a>
         </footer>

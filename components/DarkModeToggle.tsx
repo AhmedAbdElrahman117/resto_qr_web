@@ -4,7 +4,7 @@ import { useTheme } from './ThemeProvider';
 import { useEffect, useState } from 'react';
 
 export default function DarkModeToggle() {
-  const { theme, setTheme, resolvedTheme } = useTheme();
+  const { setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   // Avoid hydration mismatch

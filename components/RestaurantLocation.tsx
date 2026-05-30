@@ -14,15 +14,15 @@ export default function RestaurantLocation({ restaurant }: Props) {
   const mapSrc = `https://maps.google.com/maps?q=${mapQuery}&output=embed&z=16`;
 
   return (
-    <section className="location-section" aria-label="Restaurant Location">
-      <div className="location-header">
-        <h2 className="location-title">Visit Us</h2>
+    <section className="px-4 pb-10" aria-label="Restaurant Location">
+      <div className="mb-4">
+        <h2 className="text-2xl font-extrabold tracking-tight text-foreground">Visit Us</h2>
         {restaurant.restaurant_address && (
-          <p className="location-address">{restaurant.restaurant_address}</p>
+          <p className="mt-1 text-sm text-muted">{restaurant.restaurant_address}</p>
         )}
       </div>
 
-      <div className="map-embed-wrapper">
+      <div className="h-[280px] w-full overflow-hidden rounded-card border border-border shadow-sm">
         <iframe
           src={mapSrc}
           width="100%"

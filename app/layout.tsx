@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import './responsive.css';
+
+import { ThemeProvider } from '../components/ThemeProvider';
+import RouteLoader from '../components/RouteLoader';
 
 export const metadata: Metadata = {
   title: 'RestoQR | Digital Menu Platform',
@@ -12,16 +14,13 @@ export const metadata: Metadata = {
   },
 };
 
-import { ThemeProvider } from '../components/ThemeProvider';
-import RouteLoader from '../components/RouteLoader';
-
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className="bg-background" suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{
